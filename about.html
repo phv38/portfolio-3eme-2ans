@@ -120,7 +120,7 @@
                                 <li><a href="./portfolio.html">Projet et compétence</a></li>
                                 <li><a href="./veille-techno.html">Veille Techno</a></li>
                                 <li><a href="./services.html">Entreprise Alternance</a></li>
-                                <li><a href="./contact.html">Contacte</a></li>
+                                <li><a href="./contact.html">contact</a></li>
                             </ul>
                         </nav>
                         <div class="header__nav__social">
@@ -211,7 +211,7 @@
         <ul>
             <li><strong>Nom :</strong> Pierre-Henri Vidier</li>
             <li><strong>Âge :</strong> 21 ans</li>
-            <li><strong>Formation :</strong> 2ème année BTS SIO (Services Informatiques aux Organisations) en alternance à l'Institut supérieur Saint-Denis - Annonay</li>
+            <li><strong>Formation :</strong> 2e année BTS SIO (Services Informatiques aux Organisations) en alternance à l'Institut supérieur Saint-Denis - Annonay</li>
             <li><strong>Baccalauréat STI2D</strong> obtenu (Lycée Galilée et Lycée Saint-Denis)</li>
             <li><strong>BTS SIO</strong> en cours (Institut supérieur Saint-Denis)</li>
             <li><strong>Expérience professionnelle :</strong>
@@ -237,7 +237,8 @@
         </ul>
     </div>
 <div class="cv-btn-wrapper" style="gap: 16px;">
-    <a href="cv-pierre-henri-vidier.pdf" class="primary-btn" download>
+    <!-- changed: set href="#" to avoid browser navigation and keep id for JS -->
+    <a id="cvDownload" href="#" class="primary-btn" role="button">
         Télécharger mon CV
     </a>
     <a href="https://www.canva.com/design/DAF78E79QOI/jsjeZvSrcamatwLQbyTOKA/edit?utm_content=DAF78E79QOI&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton" class="primary-btn" target="_blank" rel="noopener">
@@ -556,10 +557,10 @@
                 <div class="row">
                     <div class="col-lg-4 col-md-6 col-sm-6">
                         <div class="footer__option__item">
-                            <h5>a propos de moi</h5>
-                            <p>Née a calais le 27/12/2004 je me suis intéréssé très jeune à l'informatique en commancant par les jeux vidéo et progressivement m'intéréssé à la sécurité informatique. </p>
-                            <p>Ce nouveau intéret ma conduite à vouloir comprendre le réseau numérique et à apprendre comment le sécurisé. Pour cela la fillière la plus adapter me semblé être la filière SIO pour pouvoir pratiquer </p>
-                            <a href="about.html" class="read__more">lire Plus <span class="arrow_right"></span></a>
+                            <h5>À propos de moi</h5>
+                            <p>Né à Calais le 27/12/2004, je me suis intéressé très jeune à l'informatique en commençant par les jeux vidéo et progressivement en me tournant vers la sécurité informatique.</p>
+                            <p>Ce nouvel intérêt m'a conduit à vouloir comprendre le réseau numérique et à apprendre comment le sécuriser. Pour cela, la filière la plus adaptée me semblait être la filière SIO pour pouvoir pratiquer.</p>
+                            <a href="about.html" class="read__more">Lire plus <span class="arrow_right"></span></a>
                         </div>
                     </div>
                     <div class="col-lg-2 col-md-3 col-sm-3">
@@ -624,6 +625,80 @@
     <script src="js/jquery.slicknav.js"></script>
     <script src="js/owl.carousel.min.js"></script>
     <script src="js/main.js"></script>
+    <script>
+/* filepath: p:\portfolio E5\portfolio-3eme-2ans-main\portfolio-3eme-2ans-main\about.html */
+/* Essaie plusieurs noms de fichiers et force le téléchargement si un PDF est trouvé. */
+(function(){
+  const btn = document.getElementById('cvDownload');
+  if (!btn) return;
+
+  // Liste de noms de fichiers possibles (ajoutez d'autres variantes si nécessaire)
+  const candidates = [
+    'CV_PierreHenri_2026.pdf',
+    'CV_Pierre_Henri_2026.pdf',
+    'CV_Pierre_Henri.pdf',
+    'cv-pierre-henri-vidier.pdf',
+    'cv-pierre-henri.pdf',
+    'cv.pdf'
+  ];
+
+  async function tryFetchAsBlob(url) {
+    try {
+      const res = await fetch(url, {cache: 'no-store'});
+      if (!res.ok) return {ok:false, status: res.status, url};
+      const blob = await res.blob();
+      return {ok:true, blob, url, contentType: res.headers.get('content-type') || '', status: res.status};
+    } catch (e) {
+      return {ok:false, error: e, url};
+    }
+  }
+
+  async function findAndDownload() {
+    const tried = [];
+    for (const name of candidates) {
+      const url = new URL(name, location.href).href;
+      tried.push(url);
+      const result = await tryFetchAsBlob(url);
+      if (result.ok) {
+        // heuristique: soit header indique PDF, soit blob.type contient pdf
+        const ct = (result.contentType || '').toLowerCase();
+        const blobType = (result.blob && result.blob.type) ? result.blob.type.toLowerCase() : '';
+        if (ct.includes('pdf') || blobType.includes('pdf') || result.blob.size > 100) {
+          // forcer le téléchargement
+          const objectUrl = URL.createObjectURL(result.blob);
+          const a = document.createElement('a');
+          a.href = objectUrl;
+          a.download = name;
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          URL.revokeObjectURL(objectUrl);
+          return;
+        } else {
+          // fichier trouvé mais pas clairement un PDF — ouvrir pour inspection
+          const objectUrl = URL.createObjectURL(result.blob);
+          window.open(objectUrl, '_blank');
+          alert('Un fichier a été trouvé mais il ne semble pas être un PDF. Il a été ouvert dans un nouvel onglet pour vérification.');
+          return;
+        }
+      } else {
+        // continue trying other candidates
+        // small delay optionally to avoid hammering server
+        await new Promise(r => setTimeout(r, 150));
+      }
+    }
+
+    // Aucun candidat trouvé
+    console.error('CV non trouvé. URLs testées :', tried);
+    alert('Téléchargement échoué (Not Found).\nVérifiez que le fichier PDF est bien présent sur le serveur et que son nom correspond à l’un des fichiers testés.\nFichiers testés (console) :\n' + tried.join('\n'));
+  }
+
+  btn.addEventListener('click', function(e){
+    e.preventDefault();
+    findAndDownload();
+  });
+})();
+</script>
 </body>
 
 </html>
