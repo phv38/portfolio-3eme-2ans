@@ -151,6 +151,27 @@
                         </ul>
                     </div>
 
+                    <!-- NOUVELLE SECTION : Galerie de preuves/captures d'écran -->
+                    <div style="background: rgba(255, 215, 0, 0.08); border-left: 4px solid #ffd700; padding: 30px; border-radius: 8px; margin-top: 40px;">
+                        <h4 style="color: #ffd700; margin-bottom: 20px;">📸 Documentation & Preuves</h4>
+                        <p style="color: #ccc; margin-bottom: 25px;">
+                            Captures d'écran, protocoles et documentation réalisés lors du projet :
+                        </p>
+
+                        <div class="row" id="documentationGallery">
+                            <div class="col-lg-6 offset-lg-3 col-md-8 offset-md-2" style="margin-bottom: 20px;">
+                                <a href="img/téléchargé.png" class="doc-image-popup">
+                                    <img src="img/téléchargé.png" style="max-width: 100%; border-radius: 8px; cursor: pointer; border: 2px solid #ffd700; height: auto; display: block; margin: 0 auto;">
+                                </a>
+                                <p style="color: #ccc; text-align: center; margin-top: 10px; font-size: 0.9em;">Documentation et preuves du projet</p>
+                            </div>
+                        </div>
+
+                        <p style="color: #999; font-size: 0.9em; margin-top: 20px;">
+                            💡 <strong>Astuce :</strong> Remplacez l'image temporaire par votre capture d'écran en changeant le chemin du fichier.
+                        </p>
+                    </div>
+
                     <div style="text-align: center; margin-top: 40px;">
                         <a href="./portfolio.html" class="primary-btn">Retour aux compétences</a>
                     </div>
@@ -225,6 +246,17 @@
     <script src="js/jquery.magnific-popup.min.js"></script>
     <script src="js/owl.carousel.min.js"></script>
     <script src="js/main.js"></script>
+    <script>
+        // Initialiser Magnific Popup pour les images de documentation
+        $(document).ready(function() {
+            $('.doc-image-popup').magnificPopup({
+                type: 'image',
+                gallery: {
+                    enabled: true
+                }
+            });
+        });
+    </script>
 </body>
 
 </html>

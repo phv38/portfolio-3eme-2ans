@@ -238,7 +238,7 @@
     </div>
 <div class="cv-btn-wrapper" style="gap: 16px;">
     <!-- changed: set href="#" to avoid browser navigation and keep id for JS -->
-    <a id="cvDownload" href="#" class="primary-btn" role="button">
+    <a id="cvDownload" href="CV_PierreHenri_2026.pdf" download="CV_PierreHenri.pdf" class="primary-btn" role="button">
         Télécharger mon CV
     </a>
     <a href="https://www.canva.com/design/DAF78E79QOI/jsjeZvSrcamatwLQbyTOKA/edit?utm_content=DAF78E79QOI&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton" class="primary-btn" target="_blank" rel="noopener">
@@ -626,71 +626,56 @@
     <script src="js/owl.carousel.min.js"></script>
     <script src="js/main.js"></script>
     <script>
-/* filepath: p:\portfolio E5\portfolio-3eme-2ans-main\portfolio-3eme-2ans-main\about.html */
-/* Essaie plusieurs noms de fichiers et force le téléchargement si un PDF est trouvé. */
+/* filepath: e:\portfolio E5 final\portfolio-3eme-2ans-main\about.html */
+/* Télécharge le CV avec gestion améliorée des chemins */
 (function(){
   const btn = document.getElementById('cvDownload');
   if (!btn) return;
 
-  // Liste de noms de fichiers possibles (ajoutez d'autres variantes si nécessaire)
+  // Liste de chemins possibles du CV
   const candidates = [
-    'CV_PierreHenri_2026.pdf',
+    'CV_PierreHenri_Vidier.pdf',
     'CV_Pierre_Henri_2026.pdf',
-    'CV_Pierre_Henri.pdf',
-    'cv-pierre-henri-vidier.pdf',
-    'cv-pierre-henri.pdf',
-    'cv.pdf'
+    'PDF/CV_PierreHenri_2026.pdf',
+    'files/CV_PierreHenri_2026.pdf',
+    'docs/CV_PierreHenri_2026.pdf',
+    '../CV_PierreHenri_2026.pdf'
   ];
 
-  async function tryFetchAsBlob(url) {
+  async function tryDownload(url) {
     try {
       const res = await fetch(url, {cache: 'no-store'});
-      if (!res.ok) return {ok:false, status: res.status, url};
-      const blob = await res.blob();
-      return {ok:true, blob, url, contentType: res.headers.get('content-type') || '', status: res.status};
-    } catch (e) {
-      return {ok:false, error: e, url};
-    }
-  }
-
-  async function findAndDownload() {
-    const tried = [];
-    for (const name of candidates) {
-      const url = new URL(name, location.href).href;
-      tried.push(url);
-      const result = await tryFetchAsBlob(url);
-      if (result.ok) {
-        // heuristique: soit header indique PDF, soit blob.type contient pdf
-        const ct = (result.contentType || '').toLowerCase();
-        const blobType = (result.blob && result.blob.type) ? result.blob.type.toLowerCase() : '';
-        if (ct.includes('pdf') || blobType.includes('pdf') || result.blob.size > 100) {
-          // forcer le téléchargement
-          const objectUrl = URL.createObjectURL(result.blob);
+      if (res.ok) {
+        const blob = await res.blob();
+        // Vérifier que c'est un vrai PDF
+        if (blob.size > 0) {
+          const objectUrl = URL.createObjectURL(blob);
           const a = document.createElement('a');
           a.href = objectUrl;
-          a.download = name;
+          a.download = 'CV_PierreHenri.pdf';
           document.body.appendChild(a);
           a.click();
           a.remove();
           URL.revokeObjectURL(objectUrl);
-          return;
-        } else {
-          // fichier trouvé mais pas clairement un PDF — ouvrir pour inspection
-          const objectUrl = URL.createObjectURL(result.blob);
-          window.open(objectUrl, '_blank');
-          alert('Un fichier a été trouvé mais il ne semble pas être un PDF. Il a été ouvert dans un nouvel onglet pour vérification.');
-          return;
+          return true;
         }
-      } else {
-        // continue trying other candidates
-        // small delay optionally to avoid hammering server
-        await new Promise(r => setTimeout(r, 150));
       }
+      return false;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  async function findAndDownload() {
+    for (const path of candidates) {
+      const found = await tryDownload(path);
+      if (found) return;
+      // Petite pause entre les tentatives
+      await new Promise(r => setTimeout(r, 100));
     }
 
-    // Aucun candidat trouvé
-    console.error('CV non trouvé. URLs testées :', tried);
-    alert('Téléchargement échoué (Not Found).\nVérifiez que le fichier PDF est bien présent sur le serveur et que son nom correspond à l’un des fichiers testés.\nFichiers testés (console) :\n' + tried.join('\n'));
+    // Aucun fichier trouvé
+    alert('Le fichier CV n\'a pas pu être trouvé.\n\nAssurez-vous que le fichier PDF se trouve à la racine du projet avec le nom "CV_PierreHenri_2026.pdf"');
   }
 
   btn.addEventListener('click', function(e){
